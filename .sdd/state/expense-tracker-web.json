@@ -1,0 +1,13 @@
+{
+  "project": "expense-tracker-web",
+  "description": "Expense tracker web app: Node.ts + React.ts + MySQL; CRUD, totals, category filter.",
+  "approved_feature_order": [
+    "database-and-server-foundation",
+    "expense-crud-api",
+    "react-expense-ui-and-totals",
+    "category-filter"
+  ],
+  "completed_features": ["database-and-server-foundation"],
+  "current_feature": "expense-crud-api",
+  "updated_at": "2026-04-16T16:00:00.000Z"
+}

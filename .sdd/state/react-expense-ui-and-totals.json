@@ -1,0 +1,50 @@
+{
+  "feature": "react-expense-ui-and-totals",
+  "mode": "manual",
+  "current_phase": "design",
+  "status": "rework_design",
+  "approved_phases": ["idea", "spec"],
+  "workers": 1,
+  "validators": 1,
+  "registry_versions": {
+    "idea": 1,
+    "spec": 1,
+    "design": 1,
+    "plan": 1,
+    "tasks": 1,
+    "validation": 1
+  },
+  "blocking_findings": [],
+  "invalidated_by_rework": {
+    "at": "2026-04-16T20:00:00.000Z",
+    "phases": ["design", "tasks", "implementation", "validation"],
+    "reason": "Rollback for UI stack change: Material UI adoption voids prior design/tasks/validation until re-approved."
+  },
+  "rework_history": [
+    {
+      "at": "2026-04-16T20:00:00.000Z",
+      "target_phase": "design",
+      "severity": "high",
+      "feedback": "Adopt Material UI (MUI) as the frontend component library for the `web/` app. Replace Tailwind-first styling with MUI: add `@mui/material`, Emotion peers (`@emotion/react`, `@emotion/styled`), and integrate with Next.js App Router per MUI docs (e.g. `ThemeProvider`, `CssBaseline`, optional `AppRouterCacheProvider` / emotion cache for SSR). Refactor dashboard, forms, table, dialogs, and summary UI to MUI components while preserving behavior, accessibility, and existing test coverage (MSW + RTL). Update `design.md` (and downstream `tasks.md` when re-drafted) to document the MUI theme, layout patterns, and any icon package (`@mui/icons-material` if used). Do not leave duplicate styling systems unless transitional; prefer one primary UI system (MUI).",
+      "trigger": "human_request",
+      "prior_status": "done",
+      "escalation_note": null
+    }
+  ],
+  "rework_cycles": {
+    "design": 1
+  },
+  "validation": {
+    "previous_approval_void": true,
+    "voided_at": "2026-04-16T20:00:00.000Z",
+    "prior_registry_snapshot": ".sdd/registry/react-expense-ui-and-totals/validation/v1.md"
+  },
+  "created_at": "2026-04-16T12:00:00.000Z",
+  "updated_at": "2026-04-16T20:00:00.000Z",
+  "last_approval": {
+    "phase": "validation",
+    "at": "2026-04-16T19:00:00.000Z",
+    "notes": "Superseded by rework 2026-04-16 — validation approval void until pipeline re-completes."
+  },
+  "notes": "Rework active: revise design for MUI, then re-draft tasks → implementation → validation. Prior validation v1 registry kept for history only."
+}

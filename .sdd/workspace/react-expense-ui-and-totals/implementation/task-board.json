@@ -1,0 +1,13 @@
+{
+  "feature": "react-expense-ui-and-totals",
+  "updated_at": "2026-04-16T18:00:00.000Z",
+  "tasks": [
+    { "id": "T-001", "title": "Scaffold Next.js app in web/", "status": "done", "depends_on": [] },
+    { "id": "T-002", "title": "Types and expenseApi service", "status": "done", "depends_on": ["T-001"] },
+    { "id": "T-003", "title": "money.ts, logger.ts, money unit tests", "status": "done", "depends_on": ["T-002"] },
+    { "id": "T-004", "title": "Zod schemas for expense forms", "status": "done", "depends_on": ["T-003"] },
+    { "id": "T-005", "title": "Data hooks (list, mutations, grand total)", "status": "done", "depends_on": ["T-004"] },
+    { "id": "T-006", "title": "Components and dashboard page", "status": "done", "depends_on": ["T-005"] },
+    { "id": "T-007", "title": "MSW, RTL tests, and READMEs", "status": "done", "depends_on": ["T-006"] }
+  ]
+}

@@ -1,0 +1,66 @@
+---
+description: Core SDD (Spec-Driven Development) workflow, human approval gates, and token efficiency rules
+alwaysApply: true
+---
+
+# SDD System
+
+This project uses Spec-Driven Development. Every feature follows a fixed pipeline with human approval gates.
+
+## Canonical Flow
+
+**Idea → Spec → Design → Plan → Tasks → Implementation → Validation**
+
+No phase may be skipped or reordered unless the developer explicitly instructs it.
+
+## Phase Outputs
+
+Every phase must produce four outputs before advancing:
+
+1. **Artifact** — primary deliverable at `.sdd/workspace/<feature>/current/<phase>.md`
+2. **Summary** — concise summary at `.sdd/summaries/<feature>/<phase>-summary.md`
+3. **Handoff** — structured context for the next agent at `.sdd/handoffs/<feature>/<from>-to-<to>.md`
+4. **State update** — updated feature state at `.sdd/state/<feature>.json`
+
+## Human Approval Rules
+
+- **Manual mode is default.** Every phase gate requires explicit human approval.
+- No agent may auto-advance, self-approve transitions, or silently change scope/architecture.
+- Agents draft, recommend, and validate. Humans decide.
+- Approval or rejection is recorded in feature state with timestamp and notes.
+- Modes: `manual` (default), `guided` (low-risk auto-advance), `delegated` (full auto). Only the developer can switch modes.
+
+## State Machine
+
+Each phase moves through: `<PHASE>_DRAFTED` → `WAITING_FOR_HUMAN_<PHASE>_APPROVAL` → `<PHASE>_APPROVED`.
+Rework sends state back to the draft state. Any state can transition to `ESCALATED` (human must resolve).
+Terminal state: `DONE`. Only one state is active per feature at a time.
+
+## Rework
+
+- Only the rejected concerns are reworked (not a full redo unless required).
+- Rolling back past an approved phase invalidates all downstream artifacts.
+- Excessive rework (>2 cycles on one phase) triggers escalation.
+
+## Token Efficiency
+
+- Read summaries before full artifacts. Only load full artifacts when summaries are insufficient.
+- Load only context relevant to the current phase and task (scoped loading).
+- Use structured handoffs to pass context between phases — avoid re-reading prior artifacts.
+- Prefer diff-based validation over re-reading everything.
+- On low token budget: sequential execution, compressed summaries, minimal workers/validators.
+- Do not regenerate approved artifacts. Reference the approved version.
+
+## State Directory
+
+All runtime state lives in `.sdd/` at the project root. See the `sdd-state` rule for conventions.
+
+## Commands (Skills)
+
+| Command | Skill |
+|---------|-------|
+| Build a feature through the pipeline | `sdd-build-feature` |
+| Build an entire project (multi-feature) | `sdd-build-project` |
+| Approve the current phase | `sdd-approve-phase` |
+| Reject and request rework | `sdd-request-rework` |
+| Run validation checks | `sdd-validate-feature` |

@@ -1,0 +1,10 @@
+---
+description: Where custom Cursor skills live for this repository — never suggest moving them to the user home directory unless explicitly requested.
+alwaysApply: true
+---
+
+# Project skills location
+
+- **Custom skills** for this project live **only** under `.cursor/skills/<skill-name>/` in the repo (versioned, shared with collaborators).
+- Do **not** recommend copying or maintaining duplicate copies under `~/.cursor/skills/` unless the user explicitly asks to use a personal copy.
+- Built-in Cursor skills under `~/.cursor/skills-cursor/` are system-managed and separate from project skills.

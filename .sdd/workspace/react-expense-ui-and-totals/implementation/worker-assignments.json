@@ -1,0 +1,11 @@
+{
+  "feature": "react-expense-ui-and-totals",
+  "updated_at": "2026-04-16T17:00:00.000Z",
+  "workers": [
+    {
+      "worker_id": "W-1",
+      "task_ids": ["T-001", "T-002", "T-003", "T-004", "T-005", "T-006", "T-007"],
+      "execution": "sequential"
+    }
+  ]
+}

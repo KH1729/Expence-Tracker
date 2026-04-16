@@ -1,0 +1,13 @@
+{
+  "feature": "database-and-server-foundation",
+  "updated_at": "2026-04-16T14:00:00.000Z",
+  "tasks": [
+    { "id": "T-001", "title": "Scaffold server TypeScript package", "status": "completed", "depends_on": [] },
+    { "id": "T-002", "title": "Migration SQL and server README", "status": "completed", "depends_on": ["T-001"] },
+    { "id": "T-003", "title": "loadEnv + .env.example + gitignore", "status": "completed", "depends_on": ["T-001"] },
+    { "id": "T-004", "title": "MySQL pool and pingDb", "status": "completed", "depends_on": ["T-003"] },
+    { "id": "T-005", "title": "Express app + middleware + GET /health", "status": "completed", "depends_on": ["T-004"] },
+    { "id": "T-006", "title": "Vitest tests health and errors", "status": "completed", "depends_on": ["T-005"] },
+    { "id": "T-007", "title": "Documentation and repo hygiene", "status": "completed", "depends_on": ["T-006"] }
+  ]
+}

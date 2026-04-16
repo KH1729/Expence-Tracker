@@ -1,0 +1,45 @@
+---
+description: SDD engineering, architecture, and validation standards. Apply when implementing features, reviewing designs, or validating artifacts in the SDD pipeline.
+alwaysApply: false
+---
+
+# SDD Engineering & Architecture Standards
+
+## Engineering Rules
+
+- Separation of concerns: workers implement, validators review, planners plan. No role blending.
+- Every implementation task must include tests. Untested code is incomplete.
+- No dead code — remove scaffolding, debug artifacts, and unused imports before marking done.
+- Follow the project's existing code style. No new patterns without explicit approval.
+- Handle all errors explicitly. No silent failures, empty catch blocks, or unhandled promises.
+- Use descriptive, consistent naming. Avoid abbreviations unless project-standard.
+- Do not introduce new external dependencies unless the task explicitly requires them.
+- Document public APIs and non-obvious logic. Do not over-document obvious code.
+- Prefer idempotent, retry-safe operations where applicable.
+- Never log secrets, hardcode credentials, or trust external input without validation.
+
+## Architecture Rules
+
+- Design within approved spec scope — no more, no less. Scope changes require human approval.
+- Lean design only. No premature frameworks, abstractions, or extension points the spec doesn't require.
+- All component boundaries must have explicitly defined interfaces. No implicit coupling.
+- Data flow must be traceable input-to-output with no hidden side effects.
+- Maintain backwards compatibility on existing interfaces unless breaking changes are approved.
+- Prefer stateless components. Where state is required, make it explicit, bounded, and observable.
+- Isolate component failures — design for graceful degradation, not cascading failure.
+- Every significant component must be observable: structured logging, health checks, meaningful errors.
+- Design for correctness first. Optimize only when profiling identifies a bottleneck.
+- Define trust boundaries explicitly. Validate all inputs crossing a trust boundary.
+
+## Validation Rules
+
+- Validators review and report only. They do not fix, rewrite, or modify anything.
+- Every check must produce an explicit PASS or FAIL. No ambiguous "looks okay."
+- Every finding must have a severity: Info, Warning, Error, or Critical.
+- Every finding must include evidence: what was checked, expected, and found.
+- The approved spec and design are the source of truth — validate against them, not assumptions.
+- Use diff-based comparison to minimize token consumption where possible.
+- If uncertain about a check, flag the uncertainty rather than defaulting to PASS.
+- Validation scope must be explicitly stated before validation begins.
+- Check cross-phase consistency: implementation matches design, design matches spec, spec matches idea.
+- Validators report findings. The human developer decides what to do about them.

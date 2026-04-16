@@ -1,0 +1,41 @@
+{
+  "feature": "expense-crud-api",
+  "project": "expense-tracker-web",
+  "mode": "manual",
+  "current_phase": "done",
+  "status": "done",
+  "approved_phases": [
+    "idea",
+    "spec",
+    "design",
+    "tasks",
+    "implementation",
+    "validation"
+  ],
+  "workers": 1,
+  "validators": 1,
+  "registry_versions": {
+    "idea": 1,
+    "spec": 1,
+    "design": 1,
+    "plan": 1,
+    "tasks": 1,
+    "validation": 1
+  },
+  "blocking_findings": [],
+  "validation": {
+    "last_run_at": "2026-04-16T19:00:00.000Z",
+    "approved_at": "2026-04-16T20:00:00.000Z",
+    "scope": "implementation",
+    "result": "pass",
+    "findings_count": {
+      "critical": 0,
+      "error": 0,
+      "warning": 0,
+      "info": 2
+    }
+  },
+  "created_at": "2026-04-16T12:00:00.000Z",
+  "updated_at": "2026-04-17T00:00:00.000Z",
+  "notes": "Human approved validation. Feature DONE. Registry snapshots at .sdd/registry/expense-crud-api/*/v1.md"
+}

@@ -1,0 +1,24 @@
+---
+alwaysApply: true
+---
+
+NODE.JS & EXPRESS
+# ─────────────────────────────────────────
+
+- All async route handlers must be wrapped in try/catch or use
+  an asyncHandler wrapper — never let unhandled promise rejections
+  reach the process.
+- Validate all incoming request bodies with zod before touching them.
+- Return consistent error shapes:
+    { success: false, error: { code: string, message: string } }
+- Return consistent success shapes:
+    { success: true, data: T }
+- Use HTTP status codes correctly:
+    200 GET success · 201 POST created · 204 DELETE/no body
+    400 validation · 401 unauthenticated · 403 forbidden
+    404 not found · 409 conflict · 422 unprocessable · 500 server
+- Middleware order: cors → helmet → rateLimit → bodyParser →
+  auth → routes → errorHandler
+- Never log sensitive fields (passwords, tokens, PII).
+  Use a structured logger (pino / winston) — never console.log
+  in production code.

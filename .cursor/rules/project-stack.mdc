@@ -1,0 +1,47 @@
+---
+description: 
+alwaysApply: true
+---
+
+#REACT & NEXT.JS
+# ─────────────────────────────────────────
+
+- Default to Server Components (Next.js App Router).
+  Add "use client" only when the component needs:
+    • useState / useReducer
+    • useEffect / browser APIs
+    • Event listeners
+  Justify "use client" with a one-line comment above the directive.
+
+- Data fetching: fetch in Server Components or Server Actions.
+  Never fetch in useEffect unless there is no alternative.
+
+- Component structure (in order):
+    a. Props interface
+    b. State declarations
+    c. Derived / memoised values
+    d. Effects  (useEffect last resort — see above)
+    e. Event handlers
+    f. Return JSX
+
+- Memoisation:
+    • useMemo for expensive pure computations
+    • useCallback for callbacks passed as props to memo'd children
+    • React.memo on leaf components that receive stable props
+    • Do NOT memoize everything — only where profiling shows need.
+
+- Forms: use react-hook-form + zod resolver.
+  Never manage form state with multiple useState calls.
+
+- Routing (App Router): use next/navigation.
+  Never import from next/router in app/ directory.
+
+- Images: always next/image with explicit width and height.
+- Links: always next/link, never raw <a> for internal routes.
+- Errors: add error.tsx and not-found.tsx at each route segment.
+
+Forbidden in React:
+  ✗ Prop drilling more than 2 levels — use context or state mgmt
+  ✗ Index as key in lists that can reorder
+  ✗ Direct DOM manipulation (use refs only when necessary)
+  ✗ Inline styles (use Tailwind or CSS modules)

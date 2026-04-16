@@ -1,0 +1,173 @@
+# Validation: react-expense-ui-and-totals
+
+## Validation Scope
+
+- **Feature:** react-expense-ui-and-totals
+- **Phase validated:** **implementation** (code + tests vs approved **spec**, **design**, **tasks**)
+- **Validated against:** `.sdd/workspace/react-expense-ui-and-totals/current/spec.md`, `design.md`, `tasks.md`; `.sdd/summaries/react-expense-ui-and-totals/` (as needed); project rules (React/Next, TypeScript, testing)
+- **Validator:** validation-agent (SDD)
+- **Strict mode:** off (warnings do not force overall FAIL)
+
+## Executive Summary
+
+Implementation **substantially matches** the approved spec and design: Next.js app under `web/`, `expenseApi`, money helpers, hooks, dashboard UI, MSW + RTL tests, and README updates are present and consistent with the task board (**T-001–T-007** marked done). **No critical** findings. **Two warnings** align with spec wording that is not fully met (grand-total **retry**, PATCH **changed-fields-only**). Several **info** items document intentional or minor deviations (RSC `page.tsx` vs design’s `"use client"` page).
+
+**Overall result:** **PASS (with warnings)**
+
+---
+
+## Checks Performed
+
+### Check 1: Spec FR-1 — API contract and base URL
+
+- **What was checked:** `web/src/services/expenseApi.ts`, `web/next.config.ts`, `.env.local.example` vs FR-1 (camelCase, success/error shapes, configurable base URL).
+- **Expected:** Typed client; `NEXT_PUBLIC_API_BASE_URL`; no trailing slash normalization; `204` delete without JSON parse on success path.
+- **Found:** Matches. `getApiBaseUrl()` strips trailing slash; list/get/create/patch/delete map `{ success: true, data }` and `ApiError` from `{ success: false, error }`; delete returns early on **204**.
+- **Result:** PASS
+- **Severity:** —
+- **Evidence:** `web/src/services/expenseApi.ts`, `web/next.config.ts`
+
+### Check 2: Spec FR-2 — List, pagination, loading/error/retry, empty state
+
+- **What was checked:** `useExpenseList`, `ExpenseTable`, `ExpenseDashboard`, `ExpenseTable` empty copy.
+- **Expected:** Default limit 20; range label; prev/next; loading + error + retry; empty when no rows.
+- **Found:** `useExpenseList(20)`; page range + buttons; list error with Retry; `ExpenseTable` empty message when `items.length === 0` and not loading.
+- **Result:** PASS
+- **Severity:** —
+- **Evidence:** `web/src/hooks/useExpenseList.ts`, `web/src/components/ExpenseTable.tsx`, `ExpenseDashboard.tsx`
+
+### Check 3: Spec FR-3 / FR-6 — Create + zod + react-hook-form
+
+- **What was checked:** `ExpenseForm` (create), `schemas/expense.ts`.
+- **Expected:** RHF + zod; validation before submit; API errors surfaced via `actionError`.
+- **Found:** `expenseCreateSchema` + `zodResolver`; create path resets on success; mutations map `ApiError.message` to UI.
+- **Result:** PASS
+- **Severity:** —
+- **Evidence:** `web/src/components/ExpenseForm.tsx`, `web/src/schemas/expense.ts`, `useExpenseMutations.ts`
+
+### Check 4: Spec FR-4 — Edit (load source, PATCH, empty body)
+
+- **What was checked:** Edit flow data source; PATCH payload; empty-patch prevention.
+- **Expected:** Spec allows list row **or** `GET :id`; PATCH **changed fields only**; UI must not send empty PATCH body.
+- **Found:** Edit uses **list row** (`setEditing(row)`) — allowed by spec (“or use list row data if sufficient”). `expenseApi.getById` exists but is not required for this path. **Edit submit sends all three fields** from the form every time, not a minimal diff. Zod + full form still prevents invalid empty semantics for required fields; **not** identical to “changed fields only” wording.
+- **Result:** PASS (functional), with **finding** on PATCH minimalism — see Findings **W-2**.
+- **Severity:** —
+- **Evidence:** `ExpenseDashboard.tsx`, `ExpenseForm.tsx`
+
+### Check 5: Spec FR-5 — Delete confirm, 204, pagination adjustment, 404 feedback
+
+- **What was checked:** `DeleteExpenseDialog`, `useExpenseMutations`, `ExpenseDashboard` effect for empty page, `expenseApi.remove`.
+- **Expected:** Confirmation UI; **204** handled; refetch; adjust offset if current page empty; **404** user-visible.
+- **Found:** `<dialog>` confirm; delete uses `remove`; `onConfirm` awaits mutation; `useEffect` reduces offset when `items.length === 0 && total > 0 && offset > 0`. **404** surfaces as `ApiError` message in `actionError` (e.g. not found text from API).
+- **Result:** PASS
+- **Severity:** —
+- **Evidence:** `DeleteExpenseDialog.tsx`, `ExpenseDashboard.tsx`, `expenseApi.ts`, `useExpenseMutations.ts`
+
+### Check 6: Spec FR-7 / FR-10 — Money + grand total algorithm
+
+- **What was checked:** `lib/money.ts`, `useGrandTotalSum.ts`, `SummaryBar.tsx`.
+- **Expected:** Decimal-safe sums (cents); paginate with **limit = 100** until all rows; loading + error; page subtotal from current `items`.
+- **Found:** `sumCents` / `parseAmountToCents` / `formatCents`; loop uses `PAGE = 100` and `apiTotal` from list; `SummaryBar` shows row count, page subtotal, grand total or loading/error.
+- **Result:** PASS (algorithm + subtotal)
+- **Severity:** —
+- **Evidence:** `web/src/lib/money.ts`, `web/src/hooks/useGrandTotalSum.ts`, `SummaryBar.tsx`
+
+### Check 7: Spec FR-10 — Grand total failure: “error and retry”
+
+- **What was checked:** Whether grand-total failure exposes a **retry** affordance (spec: “on failure, show **error** and **retry**”).
+- **Found:** `grandError` renders in `SummaryBar` (role `alert`). **No** button or control to retry only the grand-total fetch; list fetch has separate Retry. `useGrandTotalSum` does not expose a `refetch` despite JSDoc mentioning it in the return description (doc drift — see **I-2**).
+- **Result:** FAIL (spec wording)
+- **Severity:** warning
+- **Evidence:** `SummaryBar.tsx` (lines 43–46); `useGrandTotalSum.ts`; `spec.md` FR-10
+
+### Check 8: Spec FR-8 / FR-9 — Errors, CORS documentation
+
+- **What was checked:** `ApiError` usage; root + `web` README.
+- **Expected:** Map `success: false` to messages; document CORS / dual server.
+- **Found:** `ApiError` from JSON body; READMEs describe `server` + `web` and CORS expectation.
+- **Result:** PASS
+- **Severity:** —
+- **Evidence:** `expenseApi.ts`, `README.md`, `web/README.md`
+
+### Check 9: NFR-2 / NFR-3 — Accessibility baseline, no secrets, logging
+
+- **What was checked:** Labels on form controls; dialog for delete; `logger` / prod rule.
+- **Expected:** Labeled controls; confirm destructive action; `NEXT_PUBLIC_*` only for URL; no raw `console.log` in prod paths.
+- **Found:** `<label>` + inputs; delete confirmation dialog; `devLog` uses `console.debug` only when not production. Full WCAG audit **not** performed.
+- **Result:** PASS (spot check); **full a11y audit** not in scope for this validation pass.
+- **Severity:** info (limited audit)
+- **Evidence:** `ExpenseForm.tsx`, `DeleteExpenseDialog.tsx`, `lib/logger.ts`
+
+### Check 10: NFR-4 — RTL + MSW, no live server in tests
+
+- **What was checked:** `vitest.config.ts`, `vitest.setup.ts`, `src/mocks/`, `*.test.tsx`, `money.test.ts`.
+- **Expected:** MSW for API; behavior tests; Arrange/Act/Assert; no real backend in unit tests.
+- **Found:** MSW `setupServer` in setup; handlers for CRUD; `ExpenseDashboard.test.tsx`, `expenseApi.test.ts`, `money.test.ts`; fetch intercepted.
+- **Result:** PASS
+- **Severity:** —
+- **Evidence:** `web/vitest.setup.ts`, `web/src/mocks/handlers.ts`, `web/src/components/ExpenseDashboard.test.ts*`
+
+### Check 11: Design / tasks — Structure and task completion
+
+- **What was checked:** Module layout vs `design.md`; `task-board.json` vs `tasks.md`.
+- **Expected:** `web/` layout, hooks without JSX, services without components; all tasks done.
+- **Found:** `components` → `hooks` → `services` / `lib` respected; `task-board.json` shows **T-001–T-007** **done**.
+- **Result:** PASS
+- **Severity:** —
+- **Evidence:** `web/src/**`, `.sdd/workspace/react-expense-ui-and-totals/implementation/task-board.json`
+
+### Check 12: Design / tasks — `app/page.tsx` and `"use client"`
+
+- **What was checked:** `design.md` / `tasks.md` T-006 say **`app/page.tsx`** with **`"use client"`** and justification.
+- **Found:** `web/src/app/page.tsx` is a **Server Component** importing **`ExpenseDashboard`** (client). Matches **spec** constraint “Server Components default; `use client` only where needed” (`spec.md` Constraints). **Differs** from literal design/task wording.
+- **Result:** PASS (spec-aligned), **info** deviation from design artifact text.
+- **Severity:** info
+- **Evidence:** `web/src/app/page.tsx`, `ExpenseDashboard.tsx` (`'use client'`)
+
+### Check 13: Constraints — TypeScript strict, no `any`
+
+- **What was checked:** Spot-check of `web/src` for `any` (validator grep mental model: implementation uses `unknown` + narrowing in API layer).
+- **Expected:** No `any` in new code.
+- **Found:** No `any` required for validation sample paths; project rule respected in reviewed files.
+- **Result:** PASS
+- **Severity:** —
+- **Evidence:** `expenseApi.ts`, schemas, hooks
+
+---
+
+## Findings
+
+| ID | Severity | Summary | Evidence |
+|----|----------|---------|----------|
+| W-1 | warning | FR-10 requires **retry** when grand-total fetch fails; UI shows error text only, no dedicated retry for grand total. | `SummaryBar.tsx`, `spec.md` FR-10 |
+| W-2 | warning | FR-4 asks for PATCH with **changed fields only**; edit flow submits **all** fields from the form each time (still valid API payloads). | `ExpenseForm.tsx` edit `handleSubmit` |
+| I-1 | info | `page.tsx` is RSC + client child vs design’s `"use client"` page — **aligns with spec** server-default rule. | `page.tsx`, `spec.md` Constraints |
+| I-2 | info | `useGrandTotalSum` JSDoc mentions **refetch** in `@returns`; hook does not expose `refetch`. | `useGrandTotalSum.ts` |
+| I-3 | info | Manual keyboard / smoke testing (T-006 DoD) not executed by this validator; recommend developer smoke before sign-off. | `tasks.md` T-006 |
+| I-4 | info | ESLint via `next lint` was reported flaky in some environments; not re-run as part of this document-only validation. | — |
+
+**Critical findings:** **0** (no escalation trigger)
+
+---
+
+## Overall Determination
+
+| Outcome | Description |
+|---------|-------------|
+| **PASS (with warnings)** | Core functional requirements, architecture, tests, and documentation are met. Address **W-1** / **W-2** if strict spec literalism is required; otherwise document acceptance. |
+
+---
+
+## Recommended Next Steps (human)
+
+1. Decide whether to add **grand-total retry** (and/or expose `refetch` from `useGrandTotalSum`) to satisfy FR-10 literally.
+2. Optionally narrow PATCH payloads to **dirty fields** only, or accept current behavior and update spec wording.
+3. Run **manual smoke** (CRUD + totals + keyboard) and fix any issues found.
+4. If satisfied, advance SDD state to **validation approved** / **DONE** per your process (this report does **not** auto-approve).
+
+---
+
+## Human Approval (validation phase)
+
+- [x] Validation reviewed — **approved** (PASS with warnings accepted; no critical findings).
+- [x] Notes: Human approved validation **2026-04-16**. Registry snapshot: `.sdd/registry/react-expense-ui-and-totals/validation/v1.md`. SDD state: **DONE**.

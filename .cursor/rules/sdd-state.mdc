@@ -1,0 +1,53 @@
+---
+description: Conventions for reading and writing SDD state files in the .sdd/ directory
+globs: .sdd/**
+alwaysApply: false
+---
+
+# SDD State Directory Conventions
+
+## Directory Structure
+
+```
+.sdd/
+├── state/<feature>.json              # Feature state (single source of truth for workflow position)
+├── summaries/<feature>/<phase>-summary.md  # Phase summaries (read these first)
+├── handoffs/<feature>/<from>-to-<to>.md    # Structured context between agents
+├── workspace/<feature>/current/<phase>.md  # Active draft artifacts
+├── workspace/<feature>/implementation/     # Task board, worker assignments, code outputs
+└── registry/<feature>/<phase>/vN.md        # Approved immutable versioned artifacts
+```
+
+## Feature State JSON Schema
+
+```json
+{
+  "feature": "<feature-name>",
+  "mode": "manual | guided | delegated",
+  "current_phase": "<phase>",
+  "status": "in_progress | waiting_for_approval | approved | fail | escalated | done",
+  "approved_phases": ["idea", "spec", ...],
+  "workers": 1,
+  "validators": 1,
+  "registry_versions": { "<phase>": <version_number> },
+  "blocking_findings": [],
+  "created_at": "<ISO timestamp>",
+  "updated_at": "<ISO timestamp>"
+}
+```
+
+Update `updated_at` on every state change. Advance `current_phase` only after human approval.
+
+## Summaries
+
+Use the summary template: Phase, What Was Produced, Key Decisions, Risks/Open Issues, What the Next Agent Must Know. Keep concise — this is the primary input for the next phase.
+
+## Handoffs
+
+Use the handoff template: Feature, From/To agent, Completed Work (paths), Key Decisions, Constraints to Preserve, Risks, Recommended Next Action.
+
+## Registry
+
+- Only approved artifacts go in `registry/`. Drafts stay in `workspace/`.
+- Version naming: `v1.md`, `v2.md`, etc. Increment on re-approval after rework.
+- Registry artifacts are immutable. Never edit a versioned file — create a new version instead.
