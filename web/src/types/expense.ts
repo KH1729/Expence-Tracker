@@ -5,7 +5,7 @@ export interface Expense {
   id: number;
   description: string;
   amount: string;
-  category: string;
+  category: { id: number; name: string };
   createdAt: string;
   updatedAt: string;
 }

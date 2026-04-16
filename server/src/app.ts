@@ -5,8 +5,10 @@ import helmet from 'helmet';
 import type { Pool } from 'mysql2/promise';
 import type { AppConfig } from './config/loadEnv.js';
 import { createHealthRouter } from './routes/health.js';
+import { createCategoriesRouter } from './routes/categories.js';
 import { createExpensesRouter } from './routes/expenses.js';
 import { createErrorHandler } from './middleware/errorHandler.js';
+import { createRequestLogger } from './middleware/requestLogger.js';
 import { notFoundHandler } from './middleware/notFound.js';
 import type { Logger } from 'pino';
 
@@ -40,9 +42,14 @@ export function createApp(options: CreateAppOptions): express.Express {
       legacyHeaders: false,
     })
   );
+  app.use(createRequestLogger(logger));
   app.use(express.json());
 
   app.use(createHealthRouter({ pingDatabase }));
+  app.use(
+    '/api/categories',
+    createCategoriesRouter({ pool, logger })
+  );
   app.use(
     '/api/expenses',
     createExpensesRouter({ pool, logger })

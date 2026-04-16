@@ -1,0 +1,47 @@
+# Idea: Expense categories (dropdown + database table)
+
+## Raw Request
+
+User invoked `/sdd-build-feature` with:
+
+- Change the categories section so it is a **dropdown** instead of free-text (any string).
+- Add another DB table called **`categories`**.
+- If the user wants to add a category, they can; when adding new expenses, a **PUT** call is also sent to the categories table to add a new category.
+
+## Normalized Summary
+
+Replace the current free-form `category` string on expenses with a **managed category list** backed by a new MySQL **`categories`** table. The expense form should use a **dropdown** (or select-with-create pattern) populated from the server. Users must be able to **add new categories** when needed. Saving a new expense should **ensure the chosen category exists** in `categories` (create row if new) and link the expense to that category—exact API shape (separate category endpoint vs server-side upsert on expense create) is to be decided in **Spec**.
+
+## Initial Scope
+
+- New **`categories`** table (migration) with appropriate columns (e.g. surrogate key, unique name, timestamps—final shape in Spec/Design).
+- **API** to list categories for the dropdown; **API** to create a category when the user adds one (HTTP method and idempotency: user mentioned **PUT**—Spec will align with REST norms: typically **POST** for create, **PUT** only if upsert by name is intended).
+- **Data model** alignment: `expenses` should reference categories (e.g. `category_id` FK) or an approved transitional approach—decide in Spec so the dropdown is not redundant with a duplicate string field.
+- **Web UI**: `ExpenseForm` category field becomes a **dropdown**; UX for “add new category” (inline, modal, or extra option)—decide in Spec.
+- **Validation**: zod on server and web updated so category is not an unconstrained string where a controlled value is required.
+
+## Out of Scope
+
+- Multi-user ownership of categories, permissions, or soft-delete complexity (unless product demands—default single shared list for MVP).
+- Category icons, colors, budgets, or reporting by category beyond what already exists.
+- Migrating historical `expenses.category` string data without a documented migration strategy (Spec will cover one-time backfill if needed).
+- Changing unrelated expense fields or auth.
+
+## Assumptions
+
+- Current stack remains **Express + mysql2 + Next.js** as in the repo.
+- **PUT** in the raw request may mean “a write to categories” generally; **Spec** will confirm **POST `POST /api/categories`** vs **PUT** (upsert) vs **server-only** create-on-expense.
+- Existing rows in `expenses` may need a migration from `VARCHAR category` to FK—**Design** will propose DDL.
+
+## Constraints
+
+- Parameterized SQL; zod validation; existing JSON success/error contract for APIs.
+- Manual SDD mode: no implementation until **tasks** are approved.
+
+## Human Approval Status
+
+- [x] Idea reviewed by human developer
+- [x] Scope confirmed
+- [x] Ready to proceed to Spec phase
+
+_Approved with Option A: `POST /api/categories` then expense APIs use `categoryId`._

@@ -6,11 +6,14 @@ const descriptionField = z
   .min(1, 'Description is required')
   .max(512, 'Description is too long');
 
-const categoryField = z
+const categoryIdField = z
   .string()
-  .trim()
-  .min(1, 'Category is required')
-  .max(128, 'Category is too long');
+  .min(1, 'Select a category')
+  .transform((s) => Number.parseInt(s, 10))
+  .refine(
+    (n) => Number.isInteger(n) && n > 0,
+    'Select a category'
+  );
 
 const amountField = z
   .string()
@@ -27,8 +30,14 @@ const amountField = z
 export const expenseCreateSchema = z.object({
   description: descriptionField,
   amount: amountField,
-  category: categoryField,
+  categoryId: categoryIdField,
 });
+
+const categoryIdOptionalField = z.coerce
+  .number()
+  .int()
+  .positive()
+  .optional();
 
 /**
  * @description Zod schema for PATCH /api/expenses/:id (at least one field).
@@ -37,13 +46,13 @@ export const expensePatchSchema = z
   .object({
     description: descriptionField.optional(),
     amount: amountField.optional(),
-    category: categoryField.optional(),
+    categoryId: categoryIdOptionalField,
   })
   .refine(
     (data) =>
       data.description !== undefined ||
       data.amount !== undefined ||
-      data.category !== undefined,
+      data.categoryId !== undefined,
     { message: 'Change at least one field' }
   );
 

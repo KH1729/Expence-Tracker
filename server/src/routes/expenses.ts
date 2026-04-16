@@ -18,6 +18,7 @@ import {
   listExpenses,
   updateExpensePartial,
 } from '../services/expenseRepository.js';
+import { findCategoryById } from '../services/categoryRepository.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 
 export interface ExpensesRouterDeps {
@@ -79,6 +80,14 @@ export function createExpensesRouter(deps: ExpensesRouterDeps): Router {
       if (!parsed.success) {
         throw new HttpError(400, 'VALIDATION_ERROR', zodErrorMessage(parsed.error));
       }
+      const category = await findCategoryById(pool, parsed.data.categoryId);
+      if (!category) {
+        throw new HttpError(
+          422,
+          'INVALID_CATEGORY',
+          'Category does not exist'
+        );
+      }
       const id = await insertExpense(pool, parsed.data);
       logger.info({ expenseId: id }, 'Expense created');
       const row = await findExpenseById(pool, id);
@@ -106,6 +115,16 @@ export function createExpensesRouter(deps: ExpensesRouterDeps): Router {
       const bodyParsed = patchBodySchema.safeParse(req.body);
       if (!bodyParsed.success) {
         throw new HttpError(400, 'VALIDATION_ERROR', zodErrorMessage(bodyParsed.error));
+      }
+      if (bodyParsed.data.categoryId !== undefined) {
+        const category = await findCategoryById(pool, bodyParsed.data.categoryId);
+        if (!category) {
+          throw new HttpError(
+            422,
+            'INVALID_CATEGORY',
+            'Category does not exist'
+          );
+        }
       }
       const row = await updateExpensePartial(
         pool,

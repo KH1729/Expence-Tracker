@@ -38,9 +38,10 @@ describe('createBodySchema', () => {
     const r = createBodySchema.parse({
       description: 'x',
       amount: '1.00',
-      category: 'c',
+      categoryId: 1,
     });
     expect(r.amount).toBe('1.00');
+    expect(r.categoryId).toBe(1);
   });
 });
 

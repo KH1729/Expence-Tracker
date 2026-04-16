@@ -28,7 +28,7 @@ describe('expenseRepository', () => {
       insertExpense(pool, {
         description: 'a',
         amount: '1.00',
-        category: 'c',
+        categoryId: 2,
       })
     ).resolves.toBe(5);
   });
@@ -38,7 +38,8 @@ describe('expenseRepository', () => {
       id: 1,
       description: 'a',
       amount: '1.00',
-      category: 'c',
+      category_id: 1,
+      category_name: 'c',
       created_at: new Date(),
       updated_at: new Date(),
     };

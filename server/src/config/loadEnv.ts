@@ -10,7 +10,7 @@ const envSchema = z.object({
   MYSQL_DATABASE: z.string().min(1),
   PORT: z.coerce.number().int().positive().default(4000),
   LOG_LEVEL: logLevelSchema.default('info'),
-  CORS_ORIGIN: z.string().min(1).default('http://localhost:5173'),
+  CORS_ORIGIN: z.string().min(1).default('http://localhost:3000'),
 });
 
 export type AppConfig = {

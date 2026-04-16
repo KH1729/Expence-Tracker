@@ -27,7 +27,7 @@ describe('loadEnv', () => {
     expect(config.mysqlPort).toBe(3306);
     expect(config.port).toBe(4000);
     expect(config.logLevel).toBe('info');
-    expect(config.corsOrigin).toBe('http://localhost:5173');
+    expect(config.corsOrigin).toBe('http://localhost:3000');
   });
 
   it('throws when MYSQL_HOST is missing', () => {

@@ -1,13 +1,14 @@
 import type { Expense } from '../types/expense.js';
 
 /**
- * @description Row shape from `expenses` SELECT (snake_case, MySQL types).
+ * @description Row shape from `expenses` JOIN `categories` (snake_case, MySQL types).
  */
 export interface ExpenseRow {
   id: number | bigint | string;
   description: string;
   amount: string | number;
-  category: string;
+  category_id: number | bigint | string;
+  category_name: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -19,6 +20,10 @@ export interface ExpenseRow {
  */
 export function mapExpenseRow(row: ExpenseRow): Expense {
   const idNum = typeof row.id === 'bigint' ? Number(row.id) : Number(row.id);
+  const catId =
+    typeof row.category_id === 'bigint'
+      ? Number(row.category_id)
+      : Number(row.category_id);
   const amountStr =
     typeof row.amount === 'string'
       ? normalizeTwoDecimalString(row.amount)
@@ -28,7 +33,7 @@ export function mapExpenseRow(row: ExpenseRow): Expense {
     id: idNum,
     description: row.description,
     amount: amountStr,
-    category: row.category,
+    category: { id: catId, name: row.category_name },
     createdAt: toIsoUtc(row.created_at),
     updatedAt: toIsoUtc(row.updated_at),
   };

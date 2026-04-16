@@ -12,7 +12,7 @@ export const mockConfig: AppConfig = {
   mysqlDatabase: 'test',
   port: 4000,
   logLevel: 'info',
-  corsOrigin: 'http://localhost:5173',
+  corsOrigin: 'http://localhost:3000',
 };
 
 /** @description Silent pino logger for tests (no console noise). */

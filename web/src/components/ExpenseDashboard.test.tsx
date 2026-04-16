@@ -9,7 +9,7 @@ const SAMPLE: Expense = {
   id: 1,
   description: 'Coffee',
   amount: '3.50',
-  category: 'Food',
+  category: { id: 1, name: 'Food' },
   createdAt: '2026-01-01T12:00:00.000Z',
   updatedAt: '2026-01-01T12:00:00.000Z',
 };

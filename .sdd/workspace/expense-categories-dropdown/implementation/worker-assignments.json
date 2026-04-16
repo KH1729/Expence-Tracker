@@ -1,0 +1,11 @@
+{
+  "feature": "expense-categories-dropdown",
+  "updated_at": "2026-04-16T14:00:00.000Z",
+  "workers": [
+    {
+      "worker_id": "W-1",
+      "task_ids": ["T-101", "T-102", "T-103", "T-104", "T-105", "T-106"],
+      "execution": "sequential"
+    }
+  ]
+}

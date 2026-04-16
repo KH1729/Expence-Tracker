@@ -76,13 +76,19 @@ export const amountFieldSchema = z
     return num.toFixed(2);
   });
 
+const categoryIdFieldSchema = z.coerce
+  .number()
+  .int()
+  .positive()
+  .max(Number.MAX_SAFE_INTEGER);
+
 /**
  * @description Request body for POST /api/expenses.
  */
 export const createBodySchema = z.object({
   description: z.string().trim().min(1).max(512),
   amount: amountFieldSchema,
-  category: z.string().trim().min(1).max(128),
+  categoryId: categoryIdFieldSchema,
 });
 
 export type CreateBody = z.infer<typeof createBodySchema>;
@@ -94,18 +100,19 @@ export const patchBodySchema = z
   .object({
     description: z.string().trim().min(1).max(512).optional(),
     amount: amountFieldSchema.optional(),
-    category: z.string().trim().min(1).max(128).optional(),
+    categoryId: categoryIdFieldSchema.optional(),
   })
   .strict()
   .superRefine((data, ctx) => {
     const has =
       data.description !== undefined ||
       data.amount !== undefined ||
-      data.category !== undefined;
+      data.categoryId !== undefined;
     if (!has) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: 'At least one of description, amount, category is required',
+        message:
+          'At least one of description, amount, categoryId is required',
       });
     }
   });

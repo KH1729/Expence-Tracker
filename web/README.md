@@ -1,6 +1,6 @@
 # Expense Tracker — web (Next.js)
 
-React **App Router** client for the Expense Tracker API (`GET/POST/PATCH/DELETE /api/expenses`).
+React **App Router** client for the Expense Tracker API. Expenses use **`categoryId`** on create/update; **`GET`** responses include nested **`category: { id, name }`**. Use **`GET/POST /api/categories`** to list or create categories before posting an expense.
 
 ## Prerequisites
 
@@ -34,7 +34,8 @@ If unset, `next.config.ts` defaults to `http://localhost:4000` for local builds.
 
 ## Architecture (high level)
 
-- **`src/services/expenseApi.ts`** — `fetch` client for the REST API.
+- **`src/services/expenseApi.ts`** — `fetch` client for expenses.
+- **`src/services/categoryApi.ts`** — `fetch` client for `/api/categories`.
 - **`src/hooks/`** — List, mutations, and grand-total pagination.
 - **`src/components/ExpenseDashboard.tsx`** — Main screen wiring table, forms, delete dialog.
 - **`src/mocks/`** — MSW handlers used in tests (Vitest `setupFiles`).

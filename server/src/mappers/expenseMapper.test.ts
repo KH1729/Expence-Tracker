@@ -9,7 +9,8 @@ describe('mapExpenseRow', () => {
       id: BigInt(1),
       description: 'Coffee',
       amount: '4.50',
-      category: 'Food',
+      category_id: BigInt(3),
+      category_name: 'Food',
       created_at: created,
       updated_at: updated,
     };
@@ -19,7 +20,7 @@ describe('mapExpenseRow', () => {
       id: 1,
       description: 'Coffee',
       amount: '4.50',
-      category: 'Food',
+      category: { id: 3, name: 'Food' },
       createdAt: created.toISOString(),
       updatedAt: updated.toISOString(),
     });

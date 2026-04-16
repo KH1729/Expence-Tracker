@@ -173,7 +173,7 @@ export const expenseApi = {
   async create(payload: {
     description: string;
     amount: string;
-    category: string;
+    categoryId: number;
   }): Promise<Expense> {
     const res = await fetch(expensesCollectionUrl().toString(), {
       method: 'POST',
@@ -213,7 +213,7 @@ export const expenseApi = {
     payload: Partial<{
       description: string;
       amount: string;
-      category: string;
+      categoryId: number;
     }>
   ): Promise<Expense> {
     const res = await fetch(expenseItemUrl(id).toString(), {

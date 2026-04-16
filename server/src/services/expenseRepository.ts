@@ -44,6 +44,12 @@ export async function countExpenses(pool: Pool): Promise<number> {
   }
 }
 
+const expenseSelectJoin = `SELECT e.id, e.description, e.amount,
+  e.category_id, c.name AS category_name,
+  e.created_at, e.updated_at
+  FROM expenses e
+  INNER JOIN categories c ON e.category_id = c.id`;
+
 /**
  * @description Lists expenses ordered by `created_at DESC`, `id DESC`.
  * @param pool - mysql2 pool.
@@ -57,9 +63,8 @@ export async function listExpenses(
 ): Promise<ExpenseRow[]> {
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT id, description, amount, category, created_at, updated_at
-       FROM expenses
-       ORDER BY created_at DESC, id DESC
+      `${expenseSelectJoin}
+       ORDER BY e.created_at DESC, e.id DESC
        LIMIT ? OFFSET ?`,
       [limit, offset]
     );
@@ -80,9 +85,8 @@ export async function findExpenseById(
 ): Promise<ExpenseRow | null> {
   try {
     const [rows] = await pool.query<RowDataPacket[]>(
-      `SELECT id, description, amount, category, created_at, updated_at
-       FROM expenses
-       WHERE id = ?
+      `${expenseSelectJoin}
+       WHERE e.id = ?
        LIMIT 1`,
       [id]
     );
@@ -104,12 +108,12 @@ export async function findExpenseById(
  */
 export async function insertExpense(
   pool: Pool,
-  input: { description: string; amount: string; category: string }
+  input: { description: string; amount: string; categoryId: number }
 ): Promise<number> {
   try {
     const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO expenses (description, amount, category) VALUES (?, ?, ?)`,
-      [input.description, input.amount, input.category]
+      `INSERT INTO expenses (description, amount, category_id) VALUES (?, ?, ?)`,
+      [input.description, input.amount, input.categoryId]
     );
     return Number(result.insertId);
   } catch (err) {
@@ -139,9 +143,9 @@ export async function updateExpensePartial(
     sets.push('amount = ?');
     values.push(patch.amount);
   }
-  if (patch.category !== undefined) {
-    sets.push('category = ?');
-    values.push(patch.category);
+  if (patch.categoryId !== undefined) {
+    sets.push('category_id = ?');
+    values.push(patch.categoryId);
   }
 
   if (sets.length === 0) {

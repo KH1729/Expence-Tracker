@@ -1,4 +1,5 @@
-@import "tailwindcss";
+/* Package name `@import "tailwindcss"` fails in `next dev` when Turbopack treats the repo parent as resolve context (sibling `server/` + `web/` lockfiles). */
+@import "../../node_modules/tailwindcss/index.css";
 
 :root {
   --background: #ffffff;

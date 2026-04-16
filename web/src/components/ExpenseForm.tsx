@@ -1,33 +1,44 @@
 'use client';
 
+import { ExpenseFormCategoryPicker } from '@/components/ExpenseFormCategoryPicker';
 import { expenseCreateSchema } from '@/schemas/expense';
+import type { Category } from '@/types/category';
 import type { Expense } from '@/types/expense';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
-import { z } from 'zod';
+import { useEffect, useState } from 'react';
+import type { z } from 'zod';
+
+type FormInput = z.input<typeof expenseCreateSchema>;
+type FormOutput = z.output<typeof expenseCreateSchema>;
 
 type CreateProps = {
   mode: 'create';
   initial?: undefined;
-  disabled?: boolean;
+  disabled: boolean;
+  categories: Category[];
+  isLoadingCategories: boolean;
+  onCreateCategory: (name: string) => Promise<number>;
   onSubmitCreate: (data: {
     description: string;
     amount: string;
-    category: string;
+    categoryId: number;
   }) => Promise<void>;
 };
 
 type EditProps = {
   mode: 'edit';
   initial: Expense;
-  disabled?: boolean;
+  disabled: boolean;
+  categories: Category[];
+  isLoadingCategories: boolean;
+  onCreateCategory: (name: string) => Promise<number>;
   onSubmitEdit: (
     id: number,
     data: Partial<{
       description: string;
       amount: string;
-      category: string;
+      categoryId: number;
     }>
   ) => Promise<void>;
   onCancelEdit?: () => void;
@@ -39,9 +50,11 @@ export type ExpenseFormProps = CreateProps | EditProps;
  * @description Create or edit expense using react-hook-form + zod.
  */
 export function ExpenseForm(props: ExpenseFormProps) {
-  const form = useForm<z.infer<typeof expenseCreateSchema>>({
+  const [createCategoryPickerKey, setCreateCategoryPickerKey] = useState(0);
+
+  const form = useForm<FormInput, unknown, FormOutput>({
     resolver: zodResolver(expenseCreateSchema),
-    defaultValues: { description: '', amount: '', category: '' },
+    defaultValues: { description: '', amount: '', categoryId: '' },
   });
 
   useEffect(() => {
@@ -49,9 +62,11 @@ export function ExpenseForm(props: ExpenseFormProps) {
     form.reset({
       description: props.initial.description,
       amount: props.initial.amount,
-      category: props.initial.category,
+      categoryId: String(props.initial.category.id),
     });
   }, [props.mode, props.mode === 'edit' ? props.initial.id : null, form]);
+
+  const { categories, isLoadingCategories, onCreateCategory } = props;
 
   if (props.mode === 'create') {
     const { disabled, onSubmitCreate } = props;
@@ -62,6 +77,7 @@ export function ExpenseForm(props: ExpenseFormProps) {
         onSubmit={form.handleSubmit(async (data) => {
           await onSubmitCreate(data);
           form.reset();
+          setCreateCategoryPickerKey((k) => k + 1);
         })}
         noValidate
       >
@@ -94,19 +110,14 @@ export function ExpenseForm(props: ExpenseFormProps) {
               </span>
             ) : null}
           </label>
-          <label className="block text-sm">
-            <span className="mb-1 block font-medium">Category</span>
-            <input
-              className="w-full rounded border border-zinc-300 px-2 py-1 dark:border-zinc-600 dark:bg-zinc-900"
-              {...form.register('category')}
-              disabled={disabled}
-            />
-            {form.formState.errors.category ? (
-              <span className="text-red-600" role="alert">
-                {form.formState.errors.category.message}
-              </span>
-            ) : null}
-          </label>
+          <ExpenseFormCategoryPicker
+            form={form}
+            categories={categories}
+            isLoadingCategories={isLoadingCategories}
+            disabled={disabled}
+            onCreateCategory={onCreateCategory}
+            resetKey={createCategoryPickerKey}
+          />
         </div>
         <button
           type="submit"
@@ -128,7 +139,7 @@ export function ExpenseForm(props: ExpenseFormProps) {
         await onSubmitEdit(initial.id, {
           description: data.description,
           amount: data.amount,
-          category: data.category,
+          categoryId: data.categoryId,
         });
         onCancelEdit?.();
       })}
@@ -163,19 +174,14 @@ export function ExpenseForm(props: ExpenseFormProps) {
             </span>
           ) : null}
         </label>
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium">Category</span>
-          <input
-            className="w-full rounded border border-zinc-300 px-2 py-1 dark:border-zinc-600 dark:bg-zinc-900"
-            {...form.register('category')}
-            disabled={disabled}
-          />
-          {form.formState.errors.category ? (
-            <span className="text-red-600" role="alert">
-              {form.formState.errors.category.message}
-            </span>
-          ) : null}
-        </label>
+        <ExpenseFormCategoryPicker
+          form={form}
+          categories={categories}
+          isLoadingCategories={isLoadingCategories}
+          disabled={disabled}
+          onCreateCategory={onCreateCategory}
+          resetKey={`edit-${initial.id}`}
+        />
       </div>
       <div className="flex gap-2">
         <button

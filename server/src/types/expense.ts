@@ -6,7 +6,7 @@ export interface Expense {
   description: string;
   /** Two-decimal string (e.g. `"10.50"`). */
   amount: string;
-  category: string;
+  category: { id: number; name: string };
   createdAt: string;
   updatedAt: string;
 }

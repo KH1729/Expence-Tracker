@@ -4,6 +4,9 @@ import { sumCents } from '@/lib/money';
 import { useExpenseList } from '@/hooks/useExpenseList';
 import { useExpenseMutations } from '@/hooks/useExpenseMutations';
 import { useGrandTotalSum } from '@/hooks/useGrandTotalSum';
+import { categoryApi } from '@/services/categoryApi';
+import { ApiError } from '@/services/expenseApi';
+import type { Category } from '@/types/category';
 import type { Expense } from '@/types/expense';
 import { useCallback, useEffect, useState } from 'react';
 import { DeleteExpenseDialog } from './DeleteExpenseDialog';
@@ -32,6 +35,9 @@ export function ExpenseDashboard() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
 
   const onSettled = useCallback(async () => {
     await refetch();
@@ -51,6 +57,42 @@ export function ExpenseDashboard() {
     useGrandTotalSum(total, refreshKey);
 
   const pageSubtotalCents = sumCents(items.map((i) => i.amount));
+
+  useEffect(() => {
+    let cancelled = false;
+    setCategoriesLoading(true);
+    setCategoriesError(null);
+    void categoryApi
+      .list()
+      .then((r) => {
+        if (!cancelled) {
+          setCategories(r.items);
+        }
+      })
+      .catch((e: unknown) => {
+        if (!cancelled) {
+          setCategoriesError(
+            e instanceof ApiError ? e.message : 'Failed to load categories'
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setCategoriesLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshKey]);
+
+  const handleCreateCategory = useCallback(async (name: string) => {
+    const c = await categoryApi.create(name);
+    setCategories((prev) =>
+      [...prev, c].sort((a, b) => a.name.localeCompare(b.name))
+    );
+    return c.id;
+  }, []);
 
   useEffect(() => {
     if (
@@ -97,6 +139,15 @@ export function ExpenseDashboard() {
           >
             Retry
           </button>
+        </div>
+      ) : null}
+
+      {categoriesError ? (
+        <div
+          className="mb-4 rounded border border-amber-200 bg-amber-50 p-3 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-100"
+          role="alert"
+        >
+          <p>{categoriesError}</p>
         </div>
       ) : null}
 
@@ -166,6 +217,9 @@ export function ExpenseDashboard() {
           mode="edit"
           initial={editing}
           disabled={pending}
+          categories={categories}
+          isLoadingCategories={categoriesLoading}
+          onCreateCategory={handleCreateCategory}
           onSubmitEdit={async (id, data) => {
             await updateExpense(id, data);
           }}
@@ -177,6 +231,9 @@ export function ExpenseDashboard() {
         <ExpenseForm
           mode="create"
           disabled={pending}
+          categories={categories}
+          isLoadingCategories={categoriesLoading}
+          onCreateCategory={handleCreateCategory}
           onSubmitCreate={async (data) => {
             await createExpense(data);
           }}

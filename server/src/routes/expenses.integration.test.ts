@@ -4,11 +4,19 @@ import { describe, expect, it, vi } from 'vitest';
 import { createApp } from '../app.js';
 import { mockConfig, mockLogger } from '../test/fixtures.js';
 
+const categoryRow = {
+  id: 1,
+  name: 'Food',
+  created_at: new Date('2026-04-16T10:00:00.000Z'),
+  updated_at: new Date('2026-04-16T10:00:00.000Z'),
+};
+
 const sampleRow = {
   id: 1,
   description: 'Coffee',
   amount: '4.50',
-  category: 'Food',
+  category_id: 1,
+  category_name: 'Food',
   created_at: new Date('2026-04-16T10:00:00.000Z'),
   updated_at: new Date('2026-04-16T10:00:00.000Z'),
 };
@@ -35,6 +43,7 @@ describe('expenses routes', () => {
     expect(res.body.data.total).toBe(1);
     expect(res.body.data.items).toHaveLength(1);
     expect(res.body.data.items[0].amount).toBe('4.50');
+    expect(res.body.data.items[0].category).toEqual({ id: 1, name: 'Food' });
   });
 
   it('GET /api/expenses/:id returns 404 when missing', async () => {
@@ -64,16 +73,19 @@ describe('expenses routes', () => {
     expect(res.body.data.expense.id).toBe(1);
     expect(res.body.data.expense.description).toBe('Coffee');
     expect(res.body.data.expense.amount).toBe('4.50');
-    expect(res.body.data.expense.category).toBe('Food');
+    expect(res.body.data.expense.category).toEqual({ id: 1, name: 'Food' });
   });
 
   it('POST /api/expenses returns 201', async () => {
     const created = {
       ...sampleRow,
       id: 10,
+      description: 'Tea',
+      amount: '2.00',
     };
     const query = vi
       .fn()
+      .mockResolvedValueOnce([[categoryRow]])
       .mockResolvedValueOnce([{ affectedRows: 1, insertId: 10 }])
       .mockResolvedValueOnce([[created]]);
     const app = createApp({
@@ -85,9 +97,26 @@ describe('expenses routes', () => {
 
     const res = await request(app)
       .post('/api/expenses')
-      .send({ description: 'Tea', amount: '2.00', category: 'Food' })
+      .send({ description: 'Tea', amount: '2.00', categoryId: 1 })
       .expect(201);
     expect(res.body.data.expense.id).toBe(10);
+    expect(res.body.data.expense.category.name).toBe('Food');
+  });
+
+  it('POST /api/expenses returns 422 when category id missing', async () => {
+    const query = vi.fn().mockResolvedValueOnce([[]]);
+    const app = createApp({
+      config: mockConfig,
+      logger: mockLogger,
+      pingDatabase: async () => true,
+      pool: poolWithQuery(query),
+    });
+
+    const res = await request(app)
+      .post('/api/expenses')
+      .send({ description: 'Tea', amount: '2.00', categoryId: 999 })
+      .expect(422);
+    expect(res.body.error?.code).toBe('INVALID_CATEGORY');
   });
 
   it('POST /api/expenses returns 400 on invalid amount', async () => {
@@ -101,7 +130,7 @@ describe('expenses routes', () => {
 
     const res = await request(app)
       .post('/api/expenses')
-      .send({ description: 'Tea', amount: '-1', category: 'Food' })
+      .send({ description: 'Tea', amount: '-1', categoryId: 1 })
       .expect(400);
     expect(res.body.error?.code).toBe('VALIDATION_ERROR');
     expect(query).not.toHaveBeenCalled();

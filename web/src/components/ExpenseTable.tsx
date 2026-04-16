@@ -59,7 +59,7 @@ export function ExpenseTable({
             >
               <td className="px-3 py-2">{row.description}</td>
               <td className="px-3 py-2 font-mono">{row.amount}</td>
-              <td className="px-3 py-2">{row.category}</td>
+              <td className="px-3 py-2">{row.category.name}</td>
               <td className="px-3 py-2 text-zinc-600">{formatWhen(row.createdAt)}</td>
               <td className="px-3 py-2">
                 <div className="flex gap-2">

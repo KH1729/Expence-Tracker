@@ -35,7 +35,7 @@ export function useExpenseMutations(onSettled: () => void | Promise<void>) {
   );
 
   const createExpense = useCallback(
-    (payload: { description: string; amount: string; category: string }) =>
+    (payload: { description: string; amount: string; categoryId: number }) =>
       wrap(() => expenseApi.create(payload)),
     [wrap]
   );
@@ -46,7 +46,7 @@ export function useExpenseMutations(onSettled: () => void | Promise<void>) {
       payload: Partial<{
         description: string;
         amount: string;
-        category: string;
+        categoryId: number;
       }>
     ) => wrap(() => expenseApi.patch(id, payload)),
     [wrap]

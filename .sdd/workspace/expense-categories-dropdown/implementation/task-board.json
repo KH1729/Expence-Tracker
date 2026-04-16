@@ -1,0 +1,12 @@
+{
+  "feature": "expense-categories-dropdown",
+  "updated_at": "2026-04-16T15:02:00.000Z",
+  "tasks": [
+    { "id": "T-101", "title": "Migration 002 + README note", "status": "done", "depends_on": [] },
+    { "id": "T-102", "title": "Categories API module + routes", "status": "done", "depends_on": ["T-101"] },
+    { "id": "T-103", "title": "Expenses repository + schemas + mapper refactor", "status": "done", "depends_on": ["T-102"] },
+    { "id": "T-104", "title": "Expenses integration tests + server README", "status": "done", "depends_on": ["T-103"] },
+    { "id": "T-105", "title": "Web API clients, types, ExpenseForm", "status": "done", "depends_on": ["T-104"] },
+    { "id": "T-106", "title": "MSW + web README", "status": "done", "depends_on": ["T-105"] }
+  ]
+}
